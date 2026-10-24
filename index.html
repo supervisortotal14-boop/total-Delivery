@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b4a8f">
+<title>Total Delivery</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --azul: #0b4a8f;
+    --azul-osc: #082d5c;
+    --ambar: #f5a600;
+    --ambar-osc: #d98f00;
+    --papel: #f3f6fa;
+    --tarjeta: #ffffff;
+    --texto: #14233a;
+    --suave: #5b6b82;
+    --linea: #dbe3ee;
+    --error: #b3261e;
+    --ok: #1b7a3d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--papel);
+    color: var(--texto);
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  header {
+    background: var(--azul);
+    color: #fff;
+    padding: calc(28px + env(safe-area-inset-top, 0px)) 20px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .marca {
+    display: inline-block;
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px 26px;
+    font-weight: 800;
+    font-style: italic;
+    font-size: 30px;
+    letter-spacing: -0.5px;
+    color: var(--azul);
+  }
+  header h1 { font-size: 21px; margin: 20px 0 6px; font-weight: 700; }
+  header p { margin: 0 auto; max-width: 300px; font-size: 14px; color: #cfe0f5; line-height: 1.4; }
+  .ruta { margin-top: 18px; height: 78px; position: relative; }
+  .ruta::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--ambar);
+  }
+  .camion { position: absolute; bottom: 8px; left: -90px; width: 90px; animation: pasa 7s ease-in-out 0.3s 1 forwards; }
+  @keyframes pasa { to { left: calc(50% - 45px); } }
+  @media (prefers-reduced-motion: reduce) { .camion { animation: none; left: calc(50% - 45px); } }
+
+  main { max-width: 520px; margin: 0 auto; padding: 18px 16px 40px; }
+  form { display: flex; gap: 10px; background: var(--tarjeta); padding: 10px; border-radius: 16px; border: 1px solid var(--linea); }
+  input {
+    flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 12px 14px;
+    border: 1px solid var(--linea); border-radius: 10px; background: #fff; color: var(--texto);
+  }
+  input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+  button.consultar {
+    font: inherit; font-weight: 700; font-size: 16px; padding: 0 20px; border: 0; border-radius: 10px;
+    background: var(--ambar); color: #2b1d00; cursor: pointer;
+  }
+  button.consultar:hover { background: var(--ambar-osc); }
+  button.consultar:disabled { opacity: .6; cursor: wait; }
+  .nota { font-size: 12.5px; color: var(--suave); margin: 10px 4px 0; }
+
+  #estado { margin-top: 16px; }
+  .aviso { padding: 14px 16px; border-radius: 12px; font-size: 15px; line-height: 1.4; }
+  .aviso.error { background: #fdecea; color: var(--error); }
+  .aviso.cargando { background: #e8f0fb; color: var(--azul-osc); }
+
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--linea); border-radius: 16px; padding: 16px; margin-top: 14px; }
+  .tarjeta h2 { font-size: 17px; margin: 0 0 2px; }
+  .tarjeta .sub { color: var(--suave); font-size: 14px; margin: 0; }
+  .fila { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 7px 0; border-bottom: 1px solid var(--linea); }
+  .fila:last-child { border-bottom: 0; }
+  .fila span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .doc h3 { margin: 0 0 6px; font-size: 15px; }
+  .total { display: flex; justify-content: space-between; font-weight: 700; font-size: 16px; padding-top: 10px; margin-top: 4px; border-top: 2px solid var(--azul); }
+  .total.general { font-size: 18px; color: var(--azul); }
+  .ubic-estado { font-size: 14px; margin: 8px 0 12px; }
+  .ubic-estado.viva { color: var(--ok); font-weight: 600; }
+  .ubic-estado.vieja { color: var(--suave); }
+  iframe.mapa { width: 100%; height: 260px; border: 0; border-radius: 12px; background: #e8eef6; }
+  .acciones { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { flex: 1 1 140px; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 10px; }
+  .btn.wa { background: #1fa855; color: #fff; }
+  .btn.map { background: var(--azul); color: #fff; }
+
+  #instalar {
+    display: none; margin: 14px 0 0; width: 100%; font: inherit; font-weight: 700; padding: 12px;
+    border-radius: 12px; border: 2px solid var(--azul); background: transparent; color: var(--azul); cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">total</div>
+  <h1>Seguimiento de tu pedido</h1>
+  <p>Ingresá tu ID de cliente y mirá dónde está tu camión</p>
+  <div class="ruta" aria-hidden="true">
+    <svg class="camion" viewBox="0 0 90 56" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="6" width="50" height="34" rx="4" fill="#fff"/>
+      <text x="27" y="28" font-family="system-ui,sans-serif" font-weight="800" font-size="12" text-anchor="middle" fill="#0b4a8f">TOTAL</text>
+      <path d="M54 16h16l14 14v10H54z" fill="#f5a600"/>
+      <path d="M59 20h9l9 9H59z" fill="#082d5c"/>
+      <rect x="2" y="38" width="82" height="5" fill="#082d5c"/>
+      <circle cx="20" cy="45" r="9" fill="#082d5c"/><circle cx="20" cy="45" r="3.5" fill="#fff"/>
+      <circle cx="68" cy="45" r="9" fill="#082d5c"/><circle cx="68" cy="45" r="3.5" fill="#fff"/>
+    </svg>
+  </div>
+</header>
+
+<main>
+  <form id="form" autocomplete="off">
+    <input id="cliente" inputmode="numeric" placeholder="Tu ID de cliente" aria-label="ID de cliente" required>
+    <button class="consultar" id="btn" type="submit">Consultar</button>
+  </form>
+  <p class="nota">Los importes son netos. La ubicación se actualiza cada 30 segundos.</p>
+  <button id="instalar" type="button">Instalar Total Delivery en tu celular</button>
+  <div id="estado" aria-live="polite"></div>
+</main>
+
+<script>
+// URL de tu aplicación web de Apps Script (termina en /exec)
+const API = 'https://script.google.com/macros/s/AKfycbxbDMfgNsNuCJPNZV7iAaGu_IZ45usycK7RWsdD4xm_11SyT5FzeKaQ45Y1X7CrizVL/exec';
+
+const $ = id => document.getElementById(id);
+const estado = $('estado');
+let timer = null, ultimoId = '';
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pesos = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function aviso(tipo, texto) { estado.innerHTML = '<div class="aviso ' + tipo + '">' + esc(texto) + '</div>'; }
+
+async function consultar(id, silencioso) {
+  if (!silencioso) aviso('cargando', 'Buscando tu pedido…');
+  $('btn').disabled = true;
+  try {
+    const r = await fetch(API + '?api=pedido&cliente=' + encodeURIComponent(id), { cache: 'no-store' });
+    const d = await r.json();
+    if (!d.ok) {
+      clearInterval(timer);
+      aviso('error', d.error ? 'No se pudo consultar: ' + d.error : 'No encontramos pedidos para ese ID de cliente. Revisá el número e intentá de nuevo.');
+      return;
+    }
+    pintar(d);
+    clearInterval(timer);
+    timer = setInterval(() => consultar(ultimoId, true), 30000);
+  } catch (e) {
+    if (!silencioso) aviso('error', 'No hay conexión con el servidor. Probá de nuevo en unos segundos.');
+  } finally {
+    $('btn').disabled = false;
+  }
+}
+
+function pintar(d) {
+  const i = d.info, u = d.ubic;
+  let h = '';
+
+  h += '<div class="tarjeta"><h2>' + esc(i.cliente) + '</h2><p class="sub">' + esc(i.domicilio) + '</p>' +
+       '<div class="fila"><span>Fecha</span><span>' + esc(i.fecha) + '</span></div>' +
+       '<div class="fila"><span>Chofer</span><span>' + esc(i.choferNombre) + '</span></div></div>';
+
+  h += '<div class="tarjeta"><h2>Ubicación del camión</h2>';
+  if (u && isFinite(u.lat) && isFinite(u.lng)) {
+    const viva = u.min <= 5;
+    h += '<p class="ubic-estado ' + (viva ? 'viva' : 'vieja') + '">' +
+         (viva ? 'En camino · actualizado hace ' + u.min + ' min' : 'Última ubicación hace ' + u.min + ' min (' + esc(u.hora) + ')') + '</p>' +
+         '<iframe class="mapa" title="Mapa" loading="lazy" src="https://maps.google.com/maps?q=' + u.lat + ',' + u.lng + '&z=15&output=embed"></iframe>';
+  } else {
+    h += '<p class="ubic-estado vieja">Todavía no hay ubicación del camión. Se muestra apenas el chofer salga a reparto.</p>';
+  }
+  h += '<div class="acciones">';
+  if (d.tel) h += '<a class="btn wa" href="https://wa.me/' + esc(d.tel) + '" target="_blank" rel="noopener">Escribir al chofer</a>';
+  if (u && isFinite(u.lat)) h += '<a class="btn map" href="https://www.google.com/maps?q=' + u.lat + ',' + u.lng + '" target="_blank" rel="noopener">Abrir en Maps</a>';
+  h += '</div></div>';
+
+  d.docs.forEach(doc => {
+    h += '<div class="tarjeta doc"><h3>' + esc(doc.doc) + '</h3>';
+    doc.items.forEach(it => {
+      h += '<div class="fila"><span>' + esc(it.art) + (it.bultos ? ' · ' + esc(it.bultos) + ' bultos' : '') + '</span><span>' + pesos(it.importe) + '</span></div>';
+    });
+    h += '<div class="total"><span>Total</span><span>' + pesos(doc.total) + '</span></div></div>';
+  });
+
+  if (d.docs.length > 1) {
+    h += '<div class="tarjeta"><div class="total general" style="border:0;padding:0;margin:0"><span>Total general</span><span>' + pesos(d.totalGeneral) + '</span></div></div>';
+  }
+  estado.innerHTML = h;
+}
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  ultimoId = $('cliente').value.trim();
+  if (ultimoId) consultar(ultimoId, false);
+});
+
+// Instalación como app
+let evInstalar = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); evInstalar = e; $('instalar').style.display = 'block';
+});
+$('instalar').addEventListener('click', async () => {
+  if (!evInstalar) return;
+  evInstalar.prompt(); await evInstalar.userChoice; evInstalar = null; $('instalar').style.display = 'none';
+});
+window.addEventListener('appinstalled', () => { $('instalar').style.display = 'none'; });
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
