@@ -196,17 +196,15 @@ function pintar(d) {
   if (u && isFinite(u.lat)) h += '<a class="btn map" href="https://www.google.com/maps?q=' + u.lat + ',' + u.lng + '" target="_blank" rel="noopener">Abrir en Maps</a>';
   h += '</div></div>';
 
-  d.docs.forEach(doc => {
-    h += '<div class="tarjeta doc"><h3>' + esc(doc.doc) + '</h3>';
+   d.docs.forEach(doc => {
+    h += '<div class="tarjeta doc"><h3>' + esc(doc.doc) + '</h3>' +
+         '<table class="tabla"><thead><tr><th>Artículo</th><th class="num">Bultos</th><th class="num">Importe</th></tr></thead><tbody>';
     doc.items.forEach(it => {
-      h += '<div class="fila"><span>' + esc(it.art) + (it.bultos ? ' · ' + esc(it.bultos) + ' bultos' : '') + '</span><span>' + pesos(it.importe) + '</span></div>';
+      h += '<tr><td>' + esc(it.art) + '</td><td class="num">' + esc(it.bultos) + '</td><td class="num">' + pesos(it.importe) + '</td></tr>';
     });
-    h += '<div class="total"><span>Total</span><span>' + pesos(doc.total) + '</span></div></div>';
+    h += '</tbody><tfoot><tr><td colspan="2">Total</td><td class="num">' + pesos(doc.total) + '</td></tr></tfoot></table></div>';
   });
-
-  if (d.docs.length > 1) {
-    h += '<div class="tarjeta"><div class="total general" style="border:0;padding:0;margin:0"><span>Total general</span><span>' + pesos(d.totalGeneral) + '</span></div></div>';
-  }
+    h += '<div class="tarjeta"><div class="total general" style="border:0;padding:0;margin:0"><span>Total</span><span>' + pesos(d.totalGeneral) + '</span></div></div>';
   estado.innerHTML = h;
 }
 
