@@ -185,7 +185,10 @@ function pintar(d) {
     h += '<p class="ubic-estado vieja">Todavía no hay ubicación del camión. Se muestra apenas el chofer salga a reparto.</p>';
   }
   h += '<div class="acciones">';
-  if (d.tel) h += '<a class="btn wa" href="https://wa.me/' + esc(d.tel) + '" target="_blank" rel="noopener">Escribir al chofer</a>';
+    if (d.tel) {
+    const msg = 'Hola ' + i.choferNombre + ', soy el cliente ' + i.cliente + ', quiero saber qué horario estarán pasando por mi local, gracias.';
+    h += '<a class="btn wa" href="https://wa.me/' + esc(d.tel) + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">Escribir al chofer</a>';
+  }
   if (u && isFinite(u.lat)) h += '<a class="btn map" href="https://www.google.com/maps?q=' + u.lat + ',' + u.lng + '" target="_blank" rel="noopener">Abrir en Maps</a>';
   h += '</div></div>';
 
