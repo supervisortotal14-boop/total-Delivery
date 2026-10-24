@@ -102,7 +102,11 @@
     display: none; margin: 14px 0 0; width: 100%; font: inherit; font-weight: 700; padding: 12px;
     border-radius: 12px; border: 2px solid var(--azul); background: transparent; color: var(--azul); cursor: pointer;
   }
-</style>
+  .tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tabla th { text-align: left; font-weight: 700; padding: 8px 0; border-bottom: 1px solid var(--linea); }
+  .tabla td { padding: 9px 0; border-bottom: 1px solid var(--linea); }
+  .tabla .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px; }
+  .tabla tfoot td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--azul); }
 </head>
 <body>
 
