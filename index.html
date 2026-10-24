@@ -107,6 +107,7 @@
   .tabla td { padding: 9px 0; border-bottom: 1px solid var(--linea); }
   .tabla .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px; }
   .tabla tfoot td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--azul); }
+</style>
 </head>
 <body>
 
@@ -189,14 +190,14 @@ function pintar(d) {
     h += '<p class="ubic-estado vieja">Todavía no hay ubicación del camión. Se muestra apenas el chofer salga a reparto.</p>';
   }
   h += '<div class="acciones">';
-    if (d.tel) {
+  if (d.tel) {
     const msg = 'Hola ' + i.choferNombre + ', soy el cliente ' + i.cliente + ', quiero saber qué horario estarán pasando por mi local, gracias.';
     h += '<a class="btn wa" href="https://wa.me/' + esc(d.tel) + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">Escribir al chofer</a>';
   }
   if (u && isFinite(u.lat)) h += '<a class="btn map" href="https://www.google.com/maps?q=' + u.lat + ',' + u.lng + '" target="_blank" rel="noopener">Abrir en Maps</a>';
   h += '</div></div>';
 
-   d.docs.forEach(doc => {
+  d.docs.forEach(doc => {
     h += '<div class="tarjeta doc"><h3>' + esc(doc.doc) + '</h3>' +
          '<table class="tabla"><thead><tr><th>Artículo</th><th class="num">Bultos</th><th class="num">Importe</th></tr></thead><tbody>';
     doc.items.forEach(it => {
@@ -204,7 +205,8 @@ function pintar(d) {
     });
     h += '</tbody><tfoot><tr><td colspan="2">Total</td><td class="num">' + pesos(doc.total) + '</td></tr></tfoot></table></div>';
   });
-    h += '<div class="tarjeta"><div class="total general" style="border:0;padding:0;margin:0"><span>Total</span><span>' + pesos(d.totalGeneral) + '</span></div></div>';
+
+  h += '<div class="tarjeta"><div class="total general" style="border:0;padding:0;margin:0"><span>Total</span><span>' + pesos(d.totalGeneral) + '</span></div></div>';
   estado.innerHTML = h;
 }
 
