@@ -215,7 +215,8 @@ $('form').addEventListener('submit', e => {
   ultimoId = $('cliente').value.trim();
   if (ultimoId) consultar(ultimoId, false);
 });
-
+const qs = new URLSearchParams(location.search).get('cliente');
+if (qs) { $('cliente').value = qs; ultimoId = qs.trim(); consultar(ultimoId, false); }
 // Instalación como app
 let evInstalar = null;
 window.addEventListener('beforeinstallprompt', e => {
