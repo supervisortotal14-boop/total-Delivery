@@ -1,3 +1,22 @@
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: 'AIzaSyC802AllUNXMULU725RpTtCFV2xdOT6MXI',
+  authDomain: 'total-delivery-77723.firebaseapp.com',
+  projectId: 'total-delivery-77723',
+  messagingSenderId: '878649711450',
+  appId: '1:878649711450:web:beb32f35b669d763217163'
+});
+firebase.messaging();
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) if ('focus' in c) return c.focus();
+    return clients.openWindow('./');
+  }));
+});
 const CACHE = 'total-delivery-v1';
 const ARCHIVOS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
