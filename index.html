@@ -138,9 +138,24 @@
   <div id="estado" aria-live="polite"></div>
 </main>
 
+<!-- Firebase (notificaciones) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+
 <script>
 // URL de tu aplicación web de Apps Script (termina en /exec)
 const API = 'https://script.google.com/macros/s/AKfycbxbDMfgNsNuCJPNZV7iAaGu_IZ45usycK7RWsdD4xm_11SyT5FzeKaQ45Y1X7CrizVL/exec';
+
+// ====== COMPLETÁ CON TUS DATOS DE FIREBASE ======
+const FIREBASE_CONFIG = {
+  apiKey: 'TU_API_KEY',
+  authDomain: 'TU_PROYECTO.firebaseapp.com',
+  projectId: 'TU_PROYECTO',
+  messagingSenderId: 'TU_SENDER_ID',
+  appId: 'TU_APP_ID'
+};
+const VAPID_KEY = 'TU_CLAVE_PUBLICA_VAPID';
+// =================================================
 
 const $ = id => document.getElementById(id);
 const estado = $('estado');
@@ -150,6 +165,35 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp
 const pesos = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function aviso(tipo, texto) { estado.innerHTML = '<div class="aviso ' + tipo + '">' + esc(texto) + '</div>'; }
+
+// ---------- Notificaciones ----------
+const instalada = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const puedeAvisar = instalada && 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window && typeof firebase !== 'undefined';
+
+async function registrarAvisos(clienteId) {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const reg = await navigator.serviceWorker.ready;
+    const token = await firebase.messaging().getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if (!token) return false;
+    await fetch(API + '?api=registrarToken&cliente=' + encodeURIComponent(clienteId) + '&token=' + encodeURIComponent(token));
+    return true;
+  } catch (e) { return false; }
+}
+
+async function pedirPermiso() {
+  const b = $('btnAvisos');
+  b.disabled = true;
+  const p = await Notification.requestPermission();
+  if (p === 'granted' && await registrarAvisos(ultimoId)) {
+    window._avisosOk = true;
+    b.parentElement.innerHTML = '<p class="ubic-estado viva" style="margin:0">✔ Listo, te avisaremos cuando salga tu pedido.</p>';
+  } else {
+    b.disabled = false;
+    b.textContent = 'No se pudo activar. Revisá los permisos del celular';
+  }
+}
+// ------------------------------------
 
 async function consultar(id, silencioso) {
   if (!silencioso) aviso('cargando', 'Buscando tu pedido…');
@@ -207,6 +251,17 @@ function pintar(d) {
   });
 
   h += '<div class="tarjeta"><div class="total general" style="border:0;padding:0;margin:0"><span>Total</span><span>' + pesos(d.totalGeneral) + '</span></div></div>';
+
+  // Botón de avisos (solo si la app está instalada)
+  if (puedeAvisar && Notification.permission !== 'denied') {
+    if (Notification.permission === 'granted') {
+      if (window._avisosOk !== ultimoId) { window._avisosOk = ultimoId; registrarAvisos(ultimoId); }
+      h += '<div class="tarjeta"><p class="ubic-estado viva" style="margin:0">✔ Avisos activados: te avisaremos cuando salga tu pedido.</p></div>';
+    } else {
+      h += '<div class="tarjeta"><button class="consultar" id="btnAvisos" type="button" style="width:100%;padding:12px" onclick="pedirPermiso()">🔔 Avisarme cuando salga mi pedido</button></div>';
+    }
+  }
+
   estado.innerHTML = h;
 }
 
@@ -215,8 +270,7 @@ $('form').addEventListener('submit', e => {
   ultimoId = $('cliente').value.trim();
   if (ultimoId) consultar(ultimoId, false);
 });
-const qs = new URLSearchParams(location.search).get('cliente');
-if (qs) { $('cliente').value = qs; ultimoId = qs.trim(); consultar(ultimoId, false); }
+
 // Instalación como app
 let evInstalar = null;
 window.addEventListener('beforeinstallprompt', e => {
